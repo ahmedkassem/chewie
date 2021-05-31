@@ -1,5 +1,5 @@
 # chewie
-[![Version](https://img.shields.io/pub/v/chewie.svg)](https://pub.dev/packages/chewie)
+[![Version](https://img.shields.io/badge/pub-v0.12.0-blue)](https://pub.dev/packages/chewie)
 ![CI](https://github.com/brianegan/chewie/workflows/CI/badge.svg)
 [![Generic badge](https://img.shields.io/badge/platform-android%20|%20ios%20|%20web%20-blue.svg)](https://pub.dev/packages/chewie)
 
@@ -7,14 +7,9 @@ The video player for Flutter with a heart of gold.
 
 The [`video_player`](https://pub.dartlang.org/packages/video_player) plugin provides low-level access to video playback. Chewie uses the `video_player` under the hood and wraps it in a friendly Material or Cupertino UI!
 
-## Preview
+## Demo
 
-| MaterialControls | MaterialDesktopControls |
-| :--------------: | :---------------------: |
-|     ![](https://github.com/brianegan/chewie/raw/master/assets/MaterialControls.png)     |    ![](https://github.com/brianegan/chewie/raw/master/assets/MaterialDesktopControls.png)     |
-
-### CupertinoControls
-![](https://github.com/brianegan/chewie/raw/master/assets/CupertinoControls.png)
+![Demo](https://github.com/brianegan/chewie/raw/master/assets/chewie_demo.gif)
 
 ## Installation
 
@@ -54,116 +49,6 @@ void dispose() {
   chewieController.dispose();
   super.dispose();
 }
-```
-
-## Options
-
-![](https://github.com/brianegan/chewie/raw/master/assets/Options.png)
-
-Chewie got some options which controls the video you provide. These options appear on default on a `showModalBottomSheet` (like you already know from YT maybe). Chewie is passing on default `Playback speed` and `Subtitles` options as an `OptionItem`.
-
-To add additional options just add these lines to your `ChewieController`:
-
-```dart
-additionalOptions: (context) {
-  return <OptionItem>[
-    OptionItem(
-      onTap: () => debugPrint('My option works!'),
-      iconData: Icons.chat,
-      title: 'My localized title',
-    ),
-    OptionItem(
-      onTap: () =>
-          debugPrint('Another option working!'),
-      iconData: Icons.chat,
-      title: 'Another localized title',
-    ),
-  ];
-},
-```
-
-If you don't like to show your options with the default `showModalBottomSheet` just override the View with the `optionsBuilder` method:
-
-```dart
-optionsBuilder: (context, defaultOptions) async {
-  await showDialog<void>(
-    context: context,
-    builder: (ctx) {
-      return AlertDialog(
-        content: ListView.builder(
-          itemCount: defaultOptions.length,
-          itemBuilder: (_, i) => ActionChip(
-            label: Text(defaultOptions[i].title),
-            onPressed: () =>
-                defaultOptions[i].onTap!(),
-          ),
-        ),
-      );
-    },
-  );
-},
-```
-
-Your `additionalOptions` are already included here (if you provided `additionalOptions`)!
-
-Last but not least: What is an option without proper translation. To add your strings to them just add:
-
-```dart
-optionsTranslation: OptionsTranslation(
-  playbackSpeedButtonText: 'Wiedergabegeschwindigkeit',
-  subtitlesButtonText: 'Untertitel',
-  cancelButtonText: 'Abbrechen',
-),
-```
-
-## Subtitles
-
-> Since version 1.1.0 chewie supports subtitles. Here you can see how to use them
-
-You can provide an `List<Subtitle>` and customize your subtitles with the `subtitleBuilder` function.
-
-Just add subtitles as following code is showing into your `ChewieController`:
-
-```dart
-ChewieController(
-  videoPlayerController: _videoPlayerController,
-  autoPlay: true,
-  looping: true,
-  subtitle: Subtitles([
-    Subtitle(
-      index: 0,
-      start: Duration.zero,
-      end: const Duration(seconds: 10),
-      text: 'Hello from subtitles',
-    ),
-    Subtitle(
-      index: 1,
-      start: const Duration(seconds: 10),
-      end: const Duration(seconds: 20),
-      text: 'Whats up? :)',
-    ),
-  ]),
-  subtitleBuilder: (context, subtitle) => Container(
-    padding: const EdgeInsets.all(10.0),
-    child: Text(
-      subtitle,
-      style: const TextStyle(color: Colors.white),
-    ),
-  ),
-);
-```
-
-The `index` attribute is just for purpases if you want to structure your subtitles in your database and provide your indexes here. `start`, `end` and `text` are here the key attributes. 
-
-The Duration defines on which part of your video your subtitles should start and end. For example: Your video is 10 minutes long and you want to add a subtitle between: `00:00` and `00:10`'th second you've to provide:
-
-```dart
-Subtitle(
-  index: 0,
-  start: Duration.zero,
-  end: const Duration(seconds: 10),
-  text: 'Hello from subtitles',
-),
 ```
 
 ## Example

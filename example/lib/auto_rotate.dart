@@ -1,6 +1,8 @@
+import 'package:auto_orientation/auto_orientation.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 void main() {
@@ -30,7 +32,53 @@ class _ChewieDemoState extends State<ChewieDemo> {
   @override
   void initState() {
     super.initState();
-    initializePlayer();
+    initializeAutoRotatePlayer();
+  }
+
+  Future<void> initializeAutoRotatePlayer() async {
+    _videoPlayerController1 = VideoPlayerController.network(
+        'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4');
+    await _videoPlayerController1.initialize();
+    _videoPlayerController2 = VideoPlayerController.network(
+        'https://assets.mixkit.co/videos/preview/mixkit-a-girl-blowing-a-bubble-gum-at-an-amusement-park-1226-large.mp4');
+    await _videoPlayerController2.initialize();
+    _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController1,
+        autoPlay: true,
+        looping: true,
+        routePageBuilder: (BuildContext context, Animation<double> animation,
+            Animation<double> secondAnimation, provider) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget child) {
+              return VideoScaffold(
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  body: Container(
+                    alignment: Alignment.center,
+                    color: Colors.black,
+                    child: provider,
+                  ),
+                ),
+              );
+            },
+          );
+        }
+        // Try playing around with some of these other options:
+
+        // showControls: false,
+        // materialProgressColors: ChewieProgressColors(
+        //   playedColor: Colors.red,
+        //   handleColor: Colors.blue,
+        //   backgroundColor: Colors.grey,
+        //   bufferedColor: Colors.lightGreen,
+        // ),
+        // placeholder: Container(
+        //   color: Colors.grey,
+        // ),
+        // autoInitialize: true,
+        );
+    setState(() {});
   }
 
   @override
@@ -39,34 +87,6 @@ class _ChewieDemoState extends State<ChewieDemo> {
     _videoPlayerController2.dispose();
     _chewieController.dispose();
     super.dispose();
-  }
-
-  Future<void> initializePlayer() async {
-    _videoPlayerController1 = VideoPlayerController.network(
-        'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4');
-    await _videoPlayerController1.initialize();
-    _videoPlayerController2 = VideoPlayerController.network(
-        'https://assets.mixkit.co/videos/preview/mixkit-a-girl-blowing-a-bubble-gum-at-an-amusement-park-1226-large.mp4');
-    await _videoPlayerController2.initialize();
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController1,
-      autoPlay: true,
-      looping: true,
-      // Try playing around with some of these other options:
-
-      // showControls: false,
-      // materialProgressColors: ChewieProgressColors(
-      //   playedColor: Colors.red,
-      //   handleColor: Colors.blue,
-      //   backgroundColor: Colors.grey,
-      //   bufferedColor: Colors.lightGreen,
-      // ),
-      // placeholder: Container(
-      //   color: Colors.grey,
-      // ),
-      // autoInitialize: true,
-    );
-    setState(() {});
   }
 
   @override
@@ -184,5 +204,41 @@ class _ChewieDemoState extends State<ChewieDemo> {
         ),
       ),
     );
+  }
+}
+
+class VideoScaffold extends StatefulWidget {
+  const VideoScaffold({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _VideoScaffoldState();
+}
+
+class _VideoScaffoldState extends State<VideoScaffold> {
+  @override
+  void initState() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+    AutoOrientation.portraitUpMode();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    AutoOrientation.portraitUpMode();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }

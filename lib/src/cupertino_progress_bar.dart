@@ -3,29 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:video_player/video_player.dart';
 
-class VideoProgressBar extends StatefulWidget {
-  VideoProgressBar(
+class CupertinoVideoProgressBar extends StatefulWidget {
+  CupertinoVideoProgressBar(
     this.controller, {
-    ChewieProgressColors? colors,
+    ChewieProgressColors colors,
     this.onDragEnd,
     this.onDragStart,
     this.onDragUpdate,
-    Key? key,
-    required this.barHeight,
-    required this.handleHeight,
-    required this.drawShadow,
+    Key key,
   })  : colors = colors ?? ChewieProgressColors(),
         super(key: key);
 
   final VideoPlayerController controller;
   final ChewieProgressColors colors;
-  final Function()? onDragStart;
-  final Function()? onDragEnd;
-  final Function()? onDragUpdate;
-
-  final double barHeight;
-  final double handleHeight;
-  final bool drawShadow;
+  final Function() onDragStart;
+  final Function() onDragEnd;
+  final Function() onDragUpdate;
 
   @override
   _VideoProgressBarState createState() {
@@ -33,41 +26,24 @@ class VideoProgressBar extends StatefulWidget {
   }
 }
 
-class _VideoProgressBarState extends State<VideoProgressBar> {
-  void listener() {
-    if (!mounted) return;
-    setState(() {});
-  }
-
+class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
   bool _controllerWasPlaying = false;
 
   VideoPlayerController get controller => widget.controller;
 
   @override
-  void initState() {
-    super.initState();
-    controller.addListener(listener);
-  }
-
-  @override
-  void deactivate() {
-    controller.removeListener(listener);
-    super.deactivate();
-  }
-
-  void _seekToRelativePosition(Offset globalPosition) {
-    final box = context.findRenderObject()! as RenderBox;
-    final Offset tapPos = box.globalToLocal(globalPosition);
-    final double relative = tapPos.dx / box.size.width;
-    final Duration position = controller.value.duration * relative;
-    controller.seekTo(position);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    void seekToRelativePosition(Offset globalPosition) {
+      final box = context.findRenderObject() as RenderBox;
+      final Offset tapPos = box.globalToLocal(globalPosition);
+      final double relative = tapPos.dx / box.size.width;
+      final Duration position = controller.value.duration * relative;
+      controller.seekTo(position);
+    }
+
     return GestureDetector(
       onHorizontalDragStart: (DragStartDetails details) {
-        if (!controller.value.isInitialized) {
+        if (!controller.value.initialized) {
           return;
         }
         _controllerWasPlaying = controller.value.isPlaying;
@@ -75,28 +51,34 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
           controller.pause();
         }
 
-        widget.onDragStart?.call();
+        if (widget.onDragStart != null) {
+          widget.onDragStart();
+        }
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        if (!controller.value.isInitialized) {
+        if (!controller.value.initialized) {
           return;
         }
-        _seekToRelativePosition(details.globalPosition);
+        seekToRelativePosition(details.globalPosition);
 
-        widget.onDragUpdate?.call();
+        if (widget.onDragUpdate != null) {
+          widget.onDragUpdate();
+        }
       },
       onHorizontalDragEnd: (DragEndDetails details) {
         if (_controllerWasPlaying) {
           controller.play();
         }
 
-        widget.onDragEnd?.call();
+        if (widget.onDragEnd != null) {
+          widget.onDragEnd();
+        }
       },
       onTapDown: (TapDownDetails details) {
-        if (!controller.value.isInitialized) {
+        if (!controller.value.initialized) {
           return;
         }
-        _seekToRelativePosition(details.globalPosition);
+        seekToRelativePosition(details.globalPosition);
       },
       child: Center(
         child: Container(
@@ -105,11 +87,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
           color: Colors.transparent,
           child: CustomPaint(
             painter: _ProgressBarPainter(
-              value: controller.value,
-              colors: widget.colors,
-              barHeight: widget.barHeight,
-              handleHeight: widget.handleHeight,
-              drawShadow: widget.drawShadow,
+              controller.value,
+              widget.colors,
             ),
           ),
         ),
@@ -119,20 +98,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 }
 
 class _ProgressBarPainter extends CustomPainter {
-  _ProgressBarPainter({
-    required this.value,
-    required this.colors,
-    required this.barHeight,
-    required this.handleHeight,
-    required this.drawShadow,
-  });
+  _ProgressBarPainter(this.value, this.colors);
 
   VideoPlayerValue value;
   ChewieProgressColors colors;
-
-  final double barHeight;
-  final double handleHeight;
-  final bool drawShadow;
 
   @override
   bool shouldRepaint(CustomPainter painter) {
@@ -141,7 +110,9 @@ class _ProgressBarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final baseOffset = size.height / 2 - barHeight / 2;
+    const barHeight = 5.0;
+    const handleHeight = 6.0;
+    final baseOffset = size.height / 2 - barHeight / 2.0;
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -153,7 +124,7 @@ class _ProgressBarPainter extends CustomPainter {
       ),
       colors.backgroundPaint,
     );
-    if (!value.isInitialized) {
+    if (!value.initialized) {
       return;
     }
     final double playedPartPercent =
@@ -185,18 +156,12 @@ class _ProgressBarPainter extends CustomPainter {
       colors.playedPaint,
     );
 
-    if (drawShadow) {
-      final shadowPath = Path()
-        ..addOval(
-          Rect.fromCircle(
-            center: Offset(playedPart, baseOffset + barHeight / 2),
-            radius: handleHeight,
-          ),
-        );
+    final shadowPath = Path()
+      ..addOval(Rect.fromCircle(
+          center: Offset(playedPart, baseOffset + barHeight / 2),
+          radius: handleHeight));
 
-      canvas.drawShadow(shadowPath, Colors.black, 0.2, false);
-    }
-
+    canvas.drawShadow(shadowPath, Colors.black, 0.2, false);
     canvas.drawCircle(
       Offset(playedPart, baseOffset + barHeight / 2),
       handleHeight,

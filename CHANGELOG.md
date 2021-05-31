@@ -1,25 +1,3 @@
-## 1.2.0
-
-* 🖥 __Desktop-UI__: Added `AdaptiveControls` where `MaterialDesktopControls` is now the default for Desktop-Platforms (start [ChewieDemo](https://github.com/brianegan/chewie/blob/master/example/lib/app/app.dart) for a preview)
-  - Fixes: [#188](https://github.com/brianegan/chewie/issues/478)
-* Redesign `MaterialControls` (inspired by Youtube Mobile and Desktop)
-* Fix squeeze of `CenterPlayButton`
-* Add: `optionsTranslation`, `additionalOptions` and `optionsBuilder` to create and design your Video-Options like Playback speed, subtitles and other options you want to add (use here: `additionalOptions`!). Use `optionsTranslation` to provide your localized strings!
-
-> See [Options](https://github.com/brianegan/chewie#options) to customize your Chewie options
-
-## 1.1.0
-
-* Add subtitle functionality
-  - Thanks to kirill09: [#188](https://github.com/brianegan/chewie/pull/188) with which we've improved and optimized subtitles
-
-> See readme on how to create subtitles and provide your own subtitleBuilder: [Subtitles](https://github.com/brianegan/chewie#Subtitles)
-
-## 1.0.0
-
-* Migrate to Null Safety
-  - Thanks to miDeb: [#406](https://github.com/brianegan/chewie/pull/443)
-
 ## 0.12.1+1
 
 * Lint: Format to line length 80 for pub score
